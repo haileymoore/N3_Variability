@@ -1,17 +1,25 @@
+# Author: Hailey Moore
+# Create plots for N3 variability study
+# Date: January 30, 2020
+
+# Load necessary libraries
 library(readr)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(lubridate)
 
+# Read in CSV with observation information
 observing_files <- read_csv('18a_plotting.csv')
 
+# Clean up data frame to make it more usable
 obs_dates_times <- observing_files %>% 
   separate(Obs_Data_Starts, into=c('Date_Start', 'Time_Start'), sep=' ') %>% 
   separate(Obs_Data_Stops, into=c('Date_Stop', 'Time_Stop'), sep=' ') %>% 
   subset(select = c(Archive_File, Date_Start, Time_Start, Date_Stop, Time_Stop)) %>% 
   mutate(Time = 30, Observation_Number = row_number()) 
 
+# Format dates
 obs_dates_times$Date_Start <- as.Date(obs_dates_times$Date_Start, format = '%m/%d/%y')
 obs_dates_times$Date_Stop <- as.Date(obs_dates_times$Date_Stop, format = '%m/%d/%y')
 
@@ -28,6 +36,7 @@ chigh_peakflux = c(0.0497081, 0.0540879, 0.0507876, 0.0557015, 0.050774, 0.05364
 xlow_peakflux = c(0.0456914, 0.054581, 0.059105, 0.0574829, 0.0536616, 0.0530232, 0.0513428, 0.052519)
 xhigh_peakflux = c(0.0380855, 0.0498107, 0.0519624,  0.0479987, 0.0448202, 0.0481937, 0.0458688, 0.0481993)
 
+# Add columns to dataframe that include the flux values, as well as an error column
 obs_dates_times <- obs_dates_times %>% 
   mutate(C_Low_Integrated_Flux = clow_intflux, C_Low_Peak_Flux = clow_peakflux, 
          C_High_Integrated_Flux = chigh_intflux, C_High_Peak_Flux = chigh_peakflux,
@@ -43,7 +52,6 @@ clow_plot <- ggplot(data = obs_dates_times, aes(Date_Start, C_Low_Integrated_Flu
        title = 'Integrated Flux Variability',
        subtitle = 'Low C band') +
   theme_bw()
-ggsave('clow_plot_w_obs1.png')
 
 chigh_plot <- ggplot(data = obs_dates_times, aes(Date_Start, C_High_Integrated_Flux)) +
   geom_point() +
@@ -52,7 +60,6 @@ chigh_plot <- ggplot(data = obs_dates_times, aes(Date_Start, C_High_Integrated_F
        title = 'Integrated Flux Variability',
        subtitle = 'High C band') +
   theme_bw()
-ggsave('chigh_plot_w_obs1.png')
 
 xlow_plot <- ggplot(data = obs_dates_times, aes(Date_Start, X_Low_Integrated_Flux)) +
   geom_point() +
@@ -61,7 +68,6 @@ xlow_plot <- ggplot(data = obs_dates_times, aes(Date_Start, X_Low_Integrated_Flu
        title = 'Integrated Flux Variability',
        subtitle = 'Low X band') +
   theme_bw()
-ggsave('xlow_plot_w_obs1.png')
 
 xhigh_plot <- ggplot(data = obs_dates_times, aes(Date_Start, X_High_Integrated_Flux)) +
   geom_point() +
@@ -70,13 +76,9 @@ xhigh_plot <- ggplot(data = obs_dates_times, aes(Date_Start, X_High_Integrated_F
        title = 'Integrated Flux Variability',
        subtitle = 'High X band') +
   theme_bw()
-ggsave('xhigh_plot_w_obs1.png')
 
 print(clow_plot)
 print(chigh_plot)
 print(xlow_plot)
 print(xhigh_plot)
-
-#flux_table = data.frame(observation_number, clow_intflux, clow_peakflux, chigh_intflux, chigh_peakflux,
-#                        xlow_intflux, xlow_peakflux, xhigh_intflux, xhigh_peakflux)
 
